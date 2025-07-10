@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  </head>
+  <body>
+    <button id="registerBtn">Kayıt Ol</button>
+    <button id="loginBtn">Giriş Yap</button>
+    <button id="userBtn">Kullanıcı bilgileri</button>
+
+    <form id="captchaForm" action="olmayan.html" method="post" autocomplete="off">
+      <p><input required type="text" name="name" placeholder="Ad soyad"></p>
+      <p><input required type="email" name="email" placeholder="E-posta adresi"></p>
+      <div class="g-recaptcha" data-sitekey="6Lct8nUrAAAAAGWoy62EOPgNJfu56liaQeuiQhL4"></div>
+      <br/>
+      <button>Gönder</button>
+    </form>
+
+    <script>
+      registerBtn.addEventListener('click', async () => {
+        const email = prompt('email');
+        const password = prompt('password');
+        const req = await fetch('https://blogapi.akademiprojeler.com.tr/Auth/Register',
+          {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if(req.ok) {
+          alert('kayıt başarılı');
+        }
+      });
+
+      loginBtn.addEventListener('click', async () => {
+        const email = prompt('email');
+        const password = prompt('password');
+        const req = await fetch('https://blogapi.akademiprojeler.com.tr/Auth/Login',
+          {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          }
+        );
+        
+        if(req.ok) {
+          alert('giriş başarılı');
+          const tokens = await req.json();
+          localStorage.tokens = JSON.stringify(tokens);
+        }
+        
+      });
+
+      userBtn.addEventListener('click', async () => {
+        const tokens = JSON.parse(localStorage.tokens);
+        const req = await fetch('https://blogapi.akademiprojeler.com.tr/Auth/manage/info', {
+          headers: {
+            'Authorization': `Bearer ${tokens.accessToken}`
+          }
+        });
+
+        if(req.ok) {
+          console.log(await req.json());
+        }
+      });
+
+      captchaForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const formData = new FormData(captchaForm);
+        const formObj = Object.fromEntries(formData);
+
+        const res = await fetch('https://blogapi.akademiprojeler.com.tr/deneme', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'Application/JSON'
+          },
+          body: JSON.stringify(formObj)
+        });
+
+        if(res.ok) {
+          console.log(await res.json());
+        }
+      });
+    </script>
+  </body>
+</html>
